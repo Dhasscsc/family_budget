@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>குடும்ப பட்ஜெட்</title>
+<style>
+:root{--bg:#f5f6fa;--card:#fff;--tx:#1d2433;--mu:#6b7385;--bd:#e3e6ee;--pr:#4f46e5;--in:#16a34a;--ex:#dc2626;--wa:#d97706;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12141c;--card:#1c1f2b;--tx:#eceef5;--mu:#98a0b5;--bd:#2c3040;--pr:#818cf8;--in:#4ade80;--ex:#f87171;--wa:#fbbf24;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12141c;--card:#1c1f2b;--tx:#eceef5;--mu:#98a0b5;--bd:#2c3040;--pr:#818cf8;--in:#4ade80;--ex:#f87171;--wa:#fbbf24;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Noto Sans Tamil","Latha",system-ui,sans-serif;font-size:15px;max-width:640px;margin:auto;padding:12px}
+h1{font-size:20px;margin:4px 0 10px;display:flex;justify-content:space-between;align-items:center}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:12px}
+.tabs{display:flex;gap:6px;margin-bottom:10px}
+.tabs button{flex:1;padding:9px 4px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;font:inherit;cursor:pointer}
+.tabs button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.nav b{text-align:center;flex:1}
+.nav button,.btn{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;padding:8px 12px;font:inherit;cursor:pointer}
+.btn.p{background:var(--pr);color:#fff;border-color:var(--pr)}
+.btn.d{color:var(--ex)}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.sum small{display:block;color:var(--mu);font-size:12px}
+.sum div b{font-size:16px}
+.in{color:var(--in)}.ex{color:var(--ex)}
+input,select{width:100%;padding:9px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.seg{display:flex;gap:6px;margin-bottom:8px}
+.seg button{flex:1;padding:9px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit;cursor:pointer}
+.seg button.on.e{background:var(--ex);color:#fff}.seg button.on.i{background:var(--in);color:#fff}
+.bar{height:8px;background:var(--bd);border-radius:6px;overflow:hidden;margin:4px 0 10px}
+.bar i{display:block;height:100%;background:var(--pr)}
+.bar i.w{background:var(--wa)}.bar i.x{background:var(--ex)}
+.cat{display:flex;justify-content:space-between;font-size:14px}
+.tx{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd)}
+.tx:last-child{border:0}.tx small{color:var(--mu);display:block}
+.day{font-size:12px;color:var(--mu);margin:8px 0 0;font-weight:600}
+.mu{color:var(--mu);text-align:center;padding:14px}
+.bud{display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:center;margin-bottom:8px}
+.rc{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd)}
+.hid{display:none}
+</style>
+</head>
+<body>
+<h1>💰 குடும்ப பட்ஜெட் <button class="nav-b btn" onclick="theme()">🌓</button></h1>
+
+<div class="tabs" id="tabs">
+ <button data-v="day">தினசரி</button><button data-v="week">வாரம்</button><button data-v="month">மாதம்</button><button data-v="set">பட்ஜெட்</button>
+</div>
+
+<div id="main">
+ <div class="nav"><button onclick="mv(-1)">◀</button><b id="plabel"></b><button onclick="mv(1)">▶</button></div>
+ <select id="mF" onchange="render()" style="margin-bottom:10px"></select>
+ <div class="card sum">
+  <div><small>வரவு</small><b class="in" id="sI"></b></div>
+  <div><small>செலவு</small><b class="ex" id="sE"></b></div>
+  <div><small>மீதம்</small><b id="sB"></b></div>
+ </div>
+ <div class="card" id="budCard"></div>
+ <div class="card" id="memCard"></div>
+ <div class="card"><b>பிரிவு வாரி செலவு</b><div id="cats" style="margin-top:8px"></div></div>
+ <div class="card"><b>பதிவுகள்</b><div id="list"></div></div>
+ <button class="btn p" style="width:100%;margin-bottom:12px" onclick="openForm()">➕ புதிய பதிவு</button>
+</div>
+
+<div id="setv" class="hid">
+ <div class="card"><b>மாத மொத்த பட்ஜெட் (₹)</b><input type="number" id="bTotal" placeholder="எ.கா. 30000" style="margin-top:8px" onchange="saveBud()"></div>
+ <div class="card"><b>பிரிவு வாரி மாத பட்ஜெட் (₹)</b><div id="bList" style="margin-top:8px"></div></div>
+ <div class="card"><b>👨‍👩‍👧 குடும்ப உறுப்பினர்கள்</b><input id="mIn" placeholder="அப்பா, அம்மா, பிள்ளைகள்" style="margin-top:8px" onchange="saveMem()"><small style="color:var(--mu)">காற்புள்ளியால் பிரிக்கவும்</small></div>
+ <div class="card"><b>🔁 மாதாந்திர தொடர் செலவுகள்</b><div id="rList" style="margin-top:8px"></div></div>
+ <div class="card"><b>☁ Google Sheet ஒத்திசைவு</b><input id="gUrl" placeholder="GAS Web App URL" style="margin:8px 0" onchange="saveUrl()"><div style="display:flex;gap:8px"><button class="btn p" onclick="saveUrl();push()">⬆ பதிவேற்று</button><button class="btn" onclick="saveUrl();pull()">⬇ பதிவிறக்கு</button></div><small style="color:var(--mu)">URL சேர்த்த பின் ஒவ்வொரு மாற்றமும் தானாக Sheet-க்கு செல்லும்</small></div>
+ <div class="card">
+  <b>தரவு</b>
+  <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+   <button class="btn" onclick="exp()">⬇ JSON ஏற்றுமதி</button>
+   <button class="btn" onclick="document.getElementById('imp').click()">⬆ இறக்குமதி</button>
+   <button class="btn d" onclick="clr()">🗑 அனைத்தும் அழி</button>
+  </div>
+  <input type="file" id="imp" accept=".json" class="hid" onchange="imp(this)">
+ </div>
+</div>
+
+<div id="form" class="card hid" style="position:sticky;bottom:8px;box-shadow:0 4px 20px rgba(0,0,0,.25)">
+ <div class="seg"><button class="e on" id="tE" onclick="setT('e')">செலவு</button><button class="i" id="tI" onclick="setT('i')">வரவு</button></div>
+ <div class="row"><input type="number" id="fA" placeholder="தொகை ₹"><input type="date" id="fD"></div>
+ <div class="row"><select id="fC"></select><input id="fN" placeholder="குறிப்பு"></div>
+ <div class="row"><select id="fM"></select><label style="display:flex;align-items:center;gap:6px;font-size:13px"><input type="checkbox" id="fR" style="width:auto"> ஒவ்வொரு மாதமும் (தொடர்)</label></div>
+ <div style="display:flex;gap:8px"><button class="btn p" style="flex:1" onclick="save()">சேமி</button><button class="btn" onclick="closeForm()">ரத்து</button></div>
+</div>
+
+<script>
+var EC=["உணவு / மளிகை","காய்கறி","வீட்டு வாடகை","மின்சாரம் / பில்","கல்வி","மருத்துவம்","போக்குவரத்து","உடை","பொழுதுபோக்கு","EMI / சேமிப்பு","மற்றவை"];
+var IC=["சம்பளம்","வியாபாரம்","மற்ற வரவு"];
+var S={tx:[],bud:{},total:0},view="day",anchor=new Date(),typ="e",editId=null;
+try{var r=localStorage.getItem("fb_data");if(r)S=JSON.parse(r)}catch(e){}
+function norm(){S.tx=S.tx||[];S.bud=S.bud||{};S.total=S.total||0;if(!S.members||!S.members.length)S.members=["அப்பா","அம்மா","பிள்ளைகள்"];S.rec=S.rec||[]}
+norm();
+var URL_="https://script.google.com/macros/s/AKfycbzKQDq-A9IPbtmyLVfMXbie9gQkajds0d-82uhVnIG6HvC0SSmBPjvnjYYLGYIcrL5hdQ/exec",pt=null;try{var u0=localStorage.getItem("fb_url");if(u0!==null)URL_=u0}catch(e){}
+function persist(){try{localStorage.setItem("fb_data",JSON.stringify(S))}catch(e){}clearTimeout(pt);if(URL_)pt=setTimeout(function(){push(true)},2000)}
+function push(q){if(!URL_){alert("GAS URL சேர்க்கவும்");return}
+ fetch(URL_,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(S)}).then(function(r){return r.json()}).then(function(j){if(!q)alert(j.ok?"✅ பதிவேற்றப்பட்டது":"பிழை")}).catch(function(){if(!q)alert("இணைப்பு பிழை – URL சரிபார்க்கவும்")})}
+function pull(){if(!URL_){alert("GAS URL சேர்க்கவும்");return}
+ fetch(URL_).then(function(r){return r.json()}).then(function(d){if(!d||!d.tx)throw 1;if(!confirm("Sheet தரவு இந்த போன் தரவை மாற்றும். தொடரவா?"))return;S=d;norm();try{localStorage.setItem("fb_data",JSON.stringify(S))}catch(e){}fillMem();autoRec();render();alert("✅ பதிவிறக்கப்பட்டது")}).catch(function(){alert("இணைப்பு பிழை")})}
+function saveUrl(){URL_=$("gUrl").value.trim();try{localStorage.setItem("fb_url",URL_)}catch(e){}}
+function fillMem(){var o=S.members.map(function(m){return "<option>"+esc(m)+"</option>"}).join(""),v=$("mF").value;$("fM").innerHTML=o;$("mF").innerHTML="<option value=''>👨‍👩‍👧 எல்லோரும்</option>"+o;$("mF").value=v}
+function saveMem(){S.members=$("mIn").value.split(",").map(function(x){return x.trim()}).filter(Boolean);norm();persist();fillMem()}
+function autoRec(){var n=new Date(),cm=n.getFullYear()*12+n.getMonth(),ch=false;
+ S.rec.forEach(function(r){var m=r.next;
+  while(m<=cm){var y=Math.floor(m/12),mo=m%12,ld=new Date(y,mo+1,0).getDate(),d=new Date(y,mo,Math.min(r.day,ld));
+   if(d>n)break;
+   var id="r"+r.id+"_"+m;
+   if(!S.tx.some(function(x){return x.id==id}))S.tx.push({id:id,type:r.type,amt:r.amt,cat:r.cat,m:r.m,date:iso(d),note:r.note,rec:1});
+   m++;r.next=m;ch=true}});
+ if(ch)persist()}
+function recList(){$("rList").innerHTML=S.rec.map(function(r){return "<div class='rc'><span>"+esc(r.cat)+" · "+esc(r.m||"")+" <small style='color:var(--mu)'>"+esc(r.note||"")+" (மாதம் "+r.day+" ஆம் தேதி)</small></span><span><b class='"+(r.type=="i"?"in":"ex")+"'>"+fmt(r.amt)+"</b> <button class='btn d' style='padding:2px 8px' onclick='delRec(\""+r.id+"\")'>✕</button></span></div>"}).join("")||"<div class='mu'>இல்லை. புதிய பதிவில் 'ஒவ்வொரு மாதமும்' டிக் செய்யவும்</div>"}
+function delRec(id){if(confirm("தொடர் பதிவை நிறுத்தவா? (பழைய பதிவுகள் இருக்கும்)")){S.rec=S.rec.filter(function(r){return r.id!=id});persist();recList()}}
+function $(i){return document.getElementById(i)}
+function iso(d){var m=d.getMonth()+1,x=d.getDate();return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(x<10?"0":"")+x}
+function fmt(n){return "₹"+Math.round(n).toLocaleString("en-IN")}
+function range(){var a=new Date(anchor),s,e;
+ if(view=="day"){s=e=new Date(a)}
+ else if(view=="week"){var w=(a.getDay()+6)%7;s=new Date(a);s.setDate(a.getDate()-w);e=new Date(s);e.setDate(s.getDate()+6)}
+ else{s=new Date(a.getFullYear(),a.getMonth(),1);e=new Date(a.getFullYear(),a.getMonth()+1,0)}
+ return [iso(s),iso(e),s,e]}
+function mv(n){if(view=="day")anchor.setDate(anchor.getDate()+n);else if(view=="week")anchor.setDate(anchor.getDate()+7*n);else{anchor.setDate(1);anchor.setMonth(anchor.getMonth()+n)}render()}
+function lbl(d){return d.toLocaleDateString("ta-IN",{day:"numeric",month:"short",year:"numeric"})}
+function render(){
+ var tb=document.querySelectorAll("#tabs button");for(var i=0;i<tb.length;i++)tb[i].className=tb[i].dataset.v==view?"on":"";
+ var set=view=="set";$("main").className=set?"hid":"";$("setv").className=set?"":"hid";
+ if(set){renderSet();return}
+ var R=range(),s=R[0],e=R[1];
+ $("plabel").textContent=view=="day"?lbl(R[2]):view=="week"?lbl(R[2])+" – "+lbl(R[3]):R[2].toLocaleDateString("ta-IN",{month:"long",year:"numeric"});
+ var mf=$("mF").value,A=S.tx.filter(function(t){return t.date>=s&&t.date<=e}),L=A.filter(function(t){return !mf||t.m==mf}).sort(function(a,b){return a.date<b.date?1:-1});
+ var inc=0,exs=0,cat={};
+ L.forEach(function(t){if(t.type=="i")inc+=t.amt;else{exs+=t.amt;cat[t.cat]=(cat[t.cat]||0)+t.amt}});
+ $("sI").textContent=fmt(inc);$("sE").textContent=fmt(exs);
+ var bal=inc-exs;$("sB").textContent=fmt(bal);$("sB").className=bal<0?"ex":"in";
+ // budget card (monthly)
+ var bc=$("budCard");
+ if(view=="month"&&S.total>0){var p=exs/S.total*100;
+  bc.className="card";bc.innerHTML="<div class='cat'><b>மாத பட்ஜெட்</b><span>"+fmt(exs)+" / "+fmt(S.total)+"</span></div><div class='bar'><i class='"+(p>100?"x":p>80?"w":"")+"' style='width:"+Math.min(p,100)+"%'></i></div><small style='color:var(--mu)'>"+(S.total-exs>=0?"மீதமுள்ளது "+fmt(S.total-exs):"⚠ பட்ஜெட்டை மீறியது "+fmt(exs-S.total))+"</small>"}
+ else bc.className="hid";
+ var ms={};A.forEach(function(t){var k=t.m||"—";ms[k]=ms[k]||[0,0];ms[k][t.type=="i"?0:1]+=t.amt});
+ var mh="<b>உறுப்பினர் வாரி</b>";Object.keys(ms).forEach(function(k){mh+="<div class='cat' style='margin-top:6px'><span>"+esc(k)+"</span><span><span class='in'>+"+fmt(ms[k][0])+"</span> &nbsp; <span class='ex'>−"+fmt(ms[k][1])+"</span></span></div>"});
+ $("memCard").innerHTML=mh;$("memCard").className=Object.keys(ms).length?"card":"hid";
+ // categories
+ var ks=Object.keys(cat).sort(function(a,b){return cat[b]-cat[a]}),h="";
+ ks.forEach(function(k){var p=exs?cat[k]/exs*100:0,b=S.bud[k],extra="",cl="";
+  if(view=="month"&&b>0){var q=cat[k]/b*100;cl=q>100?"x":q>80?"w":"";extra=" / "+fmt(b);p=Math.min(q,100)}
+  h+="<div class='cat'><span>"+k+"</span><b>"+fmt(cat[k])+extra+"</b></div><div class='bar'><i class='"+cl+"' style='width:"+p+"%'></i></div>"});
+ $("cats").innerHTML=h||"<div class='mu'>செலவு இல்லை</div>";
+ // list
+ var lh="",ld="";
+ L.forEach(function(t){if(view!="day"&&t.date!=ld){ld=t.date;lh+="<div class='day'>"+lbl(new Date(t.date+"T00:00"))+"</div>"}
+  lh+="<div class='tx'><div onclick='edit(\""+t.id+"\")' style='flex:1;cursor:pointer'>"+esc(t.cat)+"<small>"+esc((t.m||"")+(t.rec?" 🔁":"")+(t.note?" · "+t.note:""))+"</small></div><b class='"+(t.type=="i"?"in":"ex")+"'>"+(t.type=="i"?"+":"−")+fmt(t.amt)+"</b><button class='btn d' style='margin-left:8px;padding:4px 8px' onclick='del(\""+t.id+"\")'>✕</button></div>"});
+ $("list").innerHTML=lh||"<div class='mu'>பதிவுகள் இல்லை</div>";
+}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function fillCats(){var c=typ=="e"?EC:IC;$("fC").innerHTML=c.map(function(x){return "<option>"+x+"</option>"}).join("")}
+function setT(t){typ=t;$("tE").className="e"+(t=="e"?" on":"");$("tI").className="i"+(t=="i"?" on":"");fillCats()}
+function openForm(){editId=null;$("fR").checked=false;$("fM").selectedIndex=0;$("fA").value="";$("fN").value="";$("fD").value=iso(anchor>new Date()?new Date():anchor);setT("e");$("form").className="card";$("fA").focus()}
+function closeForm(){$("form").className="card hid"}
+function edit(id){var t=S.tx.filter(function(x){return x.id==id})[0];if(!t)return;editId=id;setT(t.type);$("fM").value=t.m||"";$("fR").checked=false;$("fC").value=t.cat;$("fA").value=t.amt;$("fD").value=t.date;$("fN").value=t.note||"";$("form").className="card"}
+function save(){var a=parseFloat($("fA").value);if(!(a>0)){alert("தொகை உள்ளிடவும்");return}
+ var o={id:editId||String(Date.now()),type:typ,amt:a,cat:$("fC").value,date:$("fD").value||iso(new Date()),note:$("fN").value.trim(),m:$("fM").value};
+ if(!editId&&$("fR").checked){var dd=new Date(o.date+"T00:00");S.rec.push({id:String(Date.now()),type:o.type,amt:o.amt,cat:o.cat,m:o.m,note:o.note,day:dd.getDate(),next:dd.getFullYear()*12+dd.getMonth()+1});o.rec=1}
+ if(editId)S.tx=S.tx.map(function(x){return x.id==editId?o:x});else S.tx.push(o);
+ persist();closeForm();anchor=new Date(o.date+"T00:00");render()}
+function del(id){if(confirm("இந்த பதிவை நீக்கவா?")){S.tx=S.tx.filter(function(x){return x.id!=id});persist();render()}}
+function renderSet(){$("bTotal").value=S.total||"";$("mIn").value=S.members.join(", ");$("gUrl").value=URL_;recList();
+ $("bList").innerHTML=EC.map(function(c,i){return "<div class='bud'><span>"+c+"</span><input type='number' data-c='"+i+"' value='"+(S.bud[c]||"")+"' onchange='saveBud()'></div>"}).join("")}
+function saveBud(){S.total=parseFloat($("bTotal").value)||0;document.querySelectorAll("#bList input").forEach(function(i){S.bud[EC[i.dataset.c]]=parseFloat(i.value)||0});persist()}
+function exp(){var b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="family_budget_"+iso(new Date())+".json";a.click()}
+function imp(el){var f=el.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var d=JSON.parse(r.result);if(!d.tx)throw 1;S=d;norm();persist();fillMem();autoRec();view="month";render();alert("இறக்குமதி வெற்றி")}catch(e){alert("தவறான கோப்பு")}};r.readAsText(f)}
+function clr(){if(confirm("அனைத்து தரவும் அழியும். உறுதியா?")){S={tx:[],bud:{},total:0};norm();persist();fillMem();render()}}
+function theme(){var h=document.documentElement,d=h.getAttribute("data-theme");h.setAttribute("data-theme",d=="dark"?"light":"dark")}
+document.querySelectorAll("#tabs button").forEach(function(b){b.onclick=function(){view=b.dataset.v;closeForm();render()}});
+fillCats();fillMem();autoRec();render();
+</script>
+</body>
+</html>
