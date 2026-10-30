@@ -106,11 +106,14 @@ try{var r=localStorage.getItem("fb_data");if(r)S=JSON.parse(r)}catch(e){}
 function norm(){S.tx=S.tx||[];S.bud=S.bud||{};S.total=S.total||0;if(!S.members||!S.members.length)S.members=["அப்பா","அம்மா","பிள்ளைகள்"];S.rec=S.rec||[]}
 norm();
 var URL_="https://script.google.com/macros/s/AKfycbzKQDq-A9IPbtmyLVfMXbie9gQkajds0d-82uhVnIG6HvC0SSmBPjvnjYYLGYIcrL5hdQ/exec",pt=null;try{var u0=localStorage.getItem("fb_url");if(u0!==null)URL_=u0}catch(e){}
-function persist(){try{localStorage.setItem("fb_data",JSON.stringify(S))}catch(e){}clearTimeout(pt);if(URL_)pt=setTimeout(function(){push(true)},2000)}
-function push(q){if(!URL_){alert("GAS URL சேர்க்கவும்");return}
+var ready=!URL_;function persist(){S.ts=Date.now();try{localStorage.setItem("fb_data",JSON.stringify(S))}catch(e){}clearTimeout(pt);if(URL_)pt=setTimeout(function(){push(true)},2000)}
+function push(q){if(q&&!ready)return;if(!URL_){alert("GAS URL சேர்க்கவும்");return}
  fetch(URL_,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(S)}).then(function(r){return r.json()}).then(function(j){if(!q)alert(j.ok?"✅ பதிவேற்றப்பட்டது":"பிழை")}).catch(function(){if(!q)alert("இணைப்பு பிழை – URL சரிபார்க்கவும்")})}
 function pull(){if(!URL_){alert("GAS URL சேர்க்கவும்");return}
  fetch(URL_).then(function(r){return r.json()}).then(function(d){if(!d||!d.tx)throw 1;if(!confirm("Sheet தரவு இந்த போன் தரவை மாற்றும். தொடரவா?"))return;S=d;norm();try{localStorage.setItem("fb_data",JSON.stringify(S))}catch(e){}fillMem();autoRec();render();alert("✅ பதிவிறக்கப்பட்டது")}).catch(function(){alert("இணைப்பு பிழை")})}
+function pullAuto(){if(!URL_)return;fetch(URL_).then(function(r){return r.json()}).then(function(d){
+ if(d&&d.tx&&(d.members||d.tx.length)&&((!S.ts&&!S.tx.length)||(d.ts||0)>(S.ts||0))){S=d;norm();try{localStorage.setItem("fb_data",JSON.stringify(S))}catch(e){}fillMem();autoRec();render()}
+ ready=true}).catch(function(){})}
 function saveUrl(){URL_=$("gUrl").value.trim();try{localStorage.setItem("fb_url",URL_)}catch(e){}}
 function fillMem(){var o=S.members.map(function(m){return "<option>"+esc(m)+"</option>"}).join(""),v=$("mF").value;$("fM").innerHTML=o;$("mF").innerHTML="<option value=''>👨‍👩‍👧 எல்லோரும்</option>"+o;$("mF").value=v}
 function saveMem(){S.members=$("mIn").value.split(/[,;，、\n]+/).map(function(x){return x.trim()}).filter(Boolean);norm();persist();fillMem()}
@@ -186,7 +189,7 @@ function clr(){if(confirm("அனைத்து தரவும் அழிய
 function help(){$("help").classList.toggle("hid")}
 function theme(){var h=document.documentElement,d=h.getAttribute("data-theme");h.setAttribute("data-theme",d=="dark"?"light":"dark")}
 document.querySelectorAll("#tabs button").forEach(function(b){b.onclick=function(){view=b.dataset.v;closeForm();render()}});
-fillCats();fillMem();autoRec();render();
+fillCats();fillMem();autoRec();render();pullAuto();
 </script>
 </body>
 </html>
