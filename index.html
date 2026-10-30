@@ -43,7 +43,16 @@ input,select{width:100%;padding:9px;border:1px solid var(--bd);border-radius:10p
 </style>
 </head>
 <body>
-<h1>💰 குடும்ப பட்ஜெட் <button class="nav-b btn" onclick="theme()">🌓</button></h1>
+<h1>💰 குடும்ப பட்ஜெட் <span><button class="btn" onclick="help()">❓</button> <button class="nav-b btn" onclick="theme()">🌓</button></span></h1>
+<div id="help" class="card hid" style="line-height:1.7;font-size:14px">
+ <b>📖 பயன்படுத்தும் வழிகாட்டி</b>
+ <p><b>1. முதல் அமைப்பு (பட்ஜெட் டேப்)</b><br>மாத மொத்த பட்ஜெட், பிரிவு வாரி வரம்பு, குடும்ப உறுப்பினர் பெயர்களை (கமா போட்டு) உள்ளிடவும். தானாகச் சேமிக்கப்படும்.</p>
+ <p><b>2. தினசரி பதிவு</b><br>➕ புதிய பதிவு → செலவு/வரவு → தொகை, தேதி, பிரிவு, குறிப்பு, உறுப்பினர் → சேமி. திருத்த பதிவைத் தொடவும்; நீக்க ✕ அழுத்தவும்.</p>
+ <p><b>3. தொடர் செலவு (வாடகை, EMI, சம்பளம்)</b><br>பதிவில் "ஒவ்வொரு மாதமும்" டிக் செய்யவும். அடுத்த மாதங்களில் அதே தேதியில் தானாகப் பதிவாகும் (🔁). நிறுத்த: பட்ஜெட் டேப் → தொடர் செலவுகள் → ✕.</p>
+ <p><b>4. பார்வைகள்</b><br>தினசரி / வாரம் / மாதம் டேப்களில் ◀ ▶ மூலம் வேறு நாள், வாரம், மாதம் பார்க்கலாம். மேலே உள்ள தேர்வுப்பெட்டியில் ஒருவரின் கணக்கை மட்டும் பார்க்கலாம். மாதம் டேப்பில் பட்ஜெட் 80% தாண்டினால் மஞ்சள், மீறினால் சிவப்பு.</p>
+ <p><b>5. பாதுகாப்பு</b><br>Sheet ஒத்திசைவு தானாக நடக்கும் (கைமுறை: ⬆ பதிவேற்று). ⬇ பதிவிறக்கு: புதிய போனில் பழைய தரவை எடுக்க மட்டும். மாதம் ஒருமுறை JSON ஏற்றுமதி மூலம் பேக்கப் எடுக்கவும்.</p>
+ <button class="btn p" style="width:100%" onclick="help()">சரி, மூடு</button>
+</div>
 
 <div class="tabs" id="tabs">
  <button data-v="day">தினசரி</button><button data-v="week">வாரம்</button><button data-v="month">மாதம்</button><button data-v="set">பட்ஜெட்</button>
@@ -174,6 +183,7 @@ function saveBud(){S.total=parseFloat($("bTotal").value)||0;document.querySelect
 function exp(){var b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="family_budget_"+iso(new Date())+".json";a.click()}
 function imp(el){var f=el.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var d=JSON.parse(r.result);if(!d.tx)throw 1;S=d;norm();persist();fillMem();autoRec();view="month";render();alert("இறக்குமதி வெற்றி")}catch(e){alert("தவறான கோப்பு")}};r.readAsText(f)}
 function clr(){if(confirm("அனைத்து தரவும் அழியும். உறுதியா?")){S={tx:[],bud:{},total:0};norm();persist();fillMem();render()}}
+function help(){$("help").classList.toggle("hid")}
 function theme(){var h=document.documentElement,d=h.getAttribute("data-theme");h.setAttribute("data-theme",d=="dark"?"light":"dark")}
 document.querySelectorAll("#tabs button").forEach(function(b){b.onclick=function(){view=b.dataset.v;closeForm();render()}});
 fillCats();fillMem();autoRec();render();
