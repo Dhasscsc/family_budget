@@ -76,7 +76,7 @@ input,select{width:100%;padding:9px;border:1px solid var(--bd);border-radius:10p
 <div id="setv" class="hid">
  <div class="card"><b>மாத மொத்த பட்ஜெட் (₹)</b><input type="number" id="bTotal" placeholder="எ.கா. 30000" style="margin-top:8px" onchange="saveBud()"></div>
  <div class="card"><b>பிரிவு வாரி மாத பட்ஜெட் (₹)</b><div id="bList" style="margin-top:8px"></div></div>
- <div class="card"><b>👨‍👩‍👧 குடும்ப உறுப்பினர்கள்</b><input id="mIn" placeholder="அப்பா, அம்மா, பிள்ளைகள்" style="margin-top:8px" onchange="saveMem()"><small style="color:var(--mu)">காற்புள்ளியால் பிரிக்கவும்</small></div>
+ <div class="card"><b>👨‍👩‍👧 குடும்ப உறுப்பினர்கள்</b><input id="mIn" placeholder="அப்பா, அம்மா, பிள்ளைகள்" style="margin:8px 0" oninput="saveMem()" onchange="saveMem()"><button class="btn p" style="width:100%;margin-bottom:6px" onclick="saveMem();alert('✅ சேமிக்கப்பட்டது: '+S.members.join(', '))">✔ சேமி</button><small style="color:var(--mu)">காற்புள்ளியால் பிரிக்கவும்</small></div>
  <div class="card"><b>🔁 மாதாந்திர தொடர் செலவுகள்</b><div id="rList" style="margin-top:8px"></div></div>
  <div class="card"><b>☁ Google Sheet ஒத்திசைவு</b><input id="gUrl" placeholder="GAS Web App URL" style="margin:8px 0" onchange="saveUrl()"><div style="display:flex;gap:8px"><button class="btn p" onclick="saveUrl();push()">⬆ பதிவேற்று</button><button class="btn" onclick="saveUrl();pull()">⬇ பதிவிறக்கு</button></div><small style="color:var(--mu)">URL சேர்த்த பின் ஒவ்வொரு மாற்றமும் தானாக Sheet-க்கு செல்லும்</small></div>
  <div class="card">
@@ -113,7 +113,7 @@ function pull(){if(!URL_){alert("GAS URL சேர்க்கவும்");ret
  fetch(URL_).then(function(r){return r.json()}).then(function(d){if(!d||!d.tx)throw 1;if(!confirm("Sheet தரவு இந்த போன் தரவை மாற்றும். தொடரவா?"))return;S=d;norm();try{localStorage.setItem("fb_data",JSON.stringify(S))}catch(e){}fillMem();autoRec();render();alert("✅ பதிவிறக்கப்பட்டது")}).catch(function(){alert("இணைப்பு பிழை")})}
 function saveUrl(){URL_=$("gUrl").value.trim();try{localStorage.setItem("fb_url",URL_)}catch(e){}}
 function fillMem(){var o=S.members.map(function(m){return "<option>"+esc(m)+"</option>"}).join(""),v=$("mF").value;$("fM").innerHTML=o;$("mF").innerHTML="<option value=''>👨‍👩‍👧 எல்லோரும்</option>"+o;$("mF").value=v}
-function saveMem(){S.members=$("mIn").value.split(",").map(function(x){return x.trim()}).filter(Boolean);norm();persist();fillMem()}
+function saveMem(){S.members=$("mIn").value.split(/[,;，、\n]+/).map(function(x){return x.trim()}).filter(Boolean);norm();persist();fillMem()}
 function autoRec(){var n=new Date(),cm=n.getFullYear()*12+n.getMonth(),ch=false;
  S.rec.forEach(function(r){var m=r.next;
   while(m<=cm){var y=Math.floor(m/12),mo=m%12,ld=new Date(y,mo+1,0).getDate(),d=new Date(y,mo,Math.min(r.day,ld));
